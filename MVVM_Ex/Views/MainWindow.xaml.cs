@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,9 +21,19 @@ namespace MVVM_Ex
     /// </summary>
     public partial class MainWindow : Window
     {
+        Mutex mutex=null;
         public MainWindow()
         {
             InitializeComponent();
+            if (Mutex.TryOpenExisting("AntiCensor", out mutex) == true)
+            {
+                this.Close();
+                return;
+            }
+            else
+            {
+                mutex = new Mutex(false,"AntiCensor");
+            }
         }
     }
 }
