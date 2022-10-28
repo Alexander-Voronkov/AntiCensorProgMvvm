@@ -154,6 +154,7 @@ namespace MVVM_Ex.ViewModels
         private void AddWord(object param)
         {
             var res = DialogService.AddWord(ForbiddenWords.ToList());
+            if(!string.IsNullOrEmpty(res)&&!string.IsNullOrWhiteSpace(res))
             ForbiddenWords.Add(res);
         }
 
