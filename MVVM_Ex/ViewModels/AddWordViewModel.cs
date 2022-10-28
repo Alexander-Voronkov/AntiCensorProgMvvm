@@ -9,27 +9,21 @@ namespace MVVM_Ex.ViewModels
 {
     internal class AddWordViewModel:BaseViewModel
     {
-        public DialogAddWordCommand DialogAddWordCommand { get; set; }
         public List<string> Words { get; set; }
         private string _Word;
-        public string Word { get { return _Word; } set { Set(ref _Word, value); } }
-
+        public string Word { get { return _Word; } set { Set(ref _Word, value); Check(); } }
+        private bool _CheckWord;
+        public bool CheckWord { get { return _CheckWord; } set { Set(ref _CheckWord, value); } }
         private bool _Closed = false;
         public bool Closed { get { return _Closed; } set { Set(ref _Closed, value); } }
         public AddWordViewModel()
         {
-            DialogAddWordCommand = new DialogAddWordCommand(AddWord, CanAddWord);
             Words = new List<string>();
         }
 
-        private void AddWord(object param)
+        private void Check()
         {
-            Closed = true;
-        }
-
-        private bool CanAddWord(object param)
-        {
-            return !string.IsNullOrWhiteSpace(Word) && !string.IsNullOrEmpty(Word)&& !Words.Contains(Word);
+            CheckWord = !string.IsNullOrWhiteSpace(Word) && !string.IsNullOrEmpty(Word) && !Words.Contains(Word);
         }
     }
 }

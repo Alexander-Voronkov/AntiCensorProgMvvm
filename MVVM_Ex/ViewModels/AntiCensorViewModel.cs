@@ -23,13 +23,14 @@ namespace MVVM_Ex.ViewModels
         private bool _IsPaused = false;
         public bool IsPaused { get { return _IsPaused; } set { _IsPaused = value; application.Pause = value; } }
         private int _Progress;
-        public int Progress { get { return application.Progress; } set { Set(ref _Progress, value); } }
+        public int Progress { get { return _Progress; } set { Set(ref _Progress, value); if (value == 100) { IsStarted = false; } } }
         public ObservableCollection<DriveModel> SelectedDrives { get; set; }
         public ObservableCollection<string> ForbiddenWords { get; set; }
         private int _WorkTime;
         public int WorkTime { get { return _WorkTime; } set { Set(ref _WorkTime, value); } }
         public StopAppCommand StopCommand { get; set; }
         public PauseAppCommand PauseCommand { get; set; }
+        public ResumeAppCommand ResumeCommand { get; set; }
         private bool _Marquee;
         public bool Marquee { get { return _Marquee; } set { Set(ref _Marquee, value); } }
         public StartAppCommand StartCommand { get; set; }
@@ -52,7 +53,7 @@ namespace MVVM_Ex.ViewModels
             SelectedDrives = new ObservableCollection<DriveModel>(application.Drives.Select(x=>new DriveModel() { DrivePath=x,IsSelected=false}));
             ForbiddenWords = new ObservableCollection<string>();
             ForbiddenWords.CollectionChanged += ForbiddenWordsChanged;
-            application.ProgressChanged += OnChanged;
+            application.ProgressChanged += OnProgressChanged;
             application.TimeChanged += OnTimerChange;
             ExceptionFiles = new ObservableCollection<string>();
             ExceptionFiles.CollectionChanged += ExceptionsChanged;
@@ -64,7 +65,18 @@ namespace MVVM_Ex.ViewModels
             RemoveWordCommand = new RemoveWordCommand(RemoveWord,CanRemoveWord);
             LoadFromFileCommand = new LoadWordsFromFileCommand(LoadForbiddenWordsFromFile, CanLoadWords);
             SelectDestinationCommand = new DestinationFolderCommand(SelectDestinationFolder, CanSelectDestinationFolder);
+            ResumeCommand = new ResumeAppCommand(ResumeApp, CanResumeApp);
             application.CountingChanged += OnCountingChange;
+        }
+
+        private void ResumeApp(object param)
+        {
+            IsPaused = false;
+        }
+
+        private bool CanResumeApp(object param)
+        {
+            return IsPaused;
         }
 
         private void OnCountingChange()
@@ -84,7 +96,7 @@ namespace MVVM_Ex.ViewModels
             IsPaused = true;
         }
 
-        private void OnChanged()
+        private void OnProgressChanged()
         {
             Progress = application.Progress;
         }
@@ -108,7 +120,7 @@ namespace MVVM_Ex.ViewModels
 
         private bool CanPauseExecute(object param)
         {
-            return IsStarted;
+            return IsStarted&&!IsPaused;
         }
 
         private void OnTimerChange()
@@ -142,10 +154,7 @@ namespace MVVM_Ex.ViewModels
         private void AddWord(object param)
         {
             var res = DialogService.AddWord(ForbiddenWords.ToList());
-            if (res != null)
-            {
-                ForbiddenWords.Add(res);
-            }
+            ForbiddenWords.Add(res);
         }
 
         private bool CanAddWord(object param)

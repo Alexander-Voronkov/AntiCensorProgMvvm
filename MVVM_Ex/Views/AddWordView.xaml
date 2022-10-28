@@ -6,10 +6,11 @@
         xmlns:local="clr-namespace:MVVM_Ex.Views"
         xmlns:vmodels="clr-namespace:MVVM_Ex.ViewModels"
         mc:Ignorable="d"
-        Title="AddWordView" WindowStartupLocation="CenterScreen" Height="200" Width="300">
+        Title="AddWordView" WindowStartupLocation="CenterScreen" Height="200" Width="300" WindowStyle="None">
     <Window.DataContext>
         <vmodels:AddWordViewModel/>
     </Window.DataContext>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -22,7 +23,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Label Content="Enter word:" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
-        <TextBox Text="{Binding Path=Word, Mode=OneWayToSource}" Grid.Row="1" Grid.ColumnSpan="3" Margin="12"/>
-        <Button Command="{Binding Path=DialogAddWordCommand}" Content="Add" Grid.Column="0" Grid.Row="2" Margin="7" Grid.ColumnSpan="3"/>
+        <TextBox Text="{Binding Path=Word, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.ColumnSpan="3" Margin="12"/>
+        <Button IsCancel="True" IsEnabled="{Binding Path=CheckWord}" Content="Add" Grid.Column="0" Grid.Row="2" Margin="7" Grid.ColumnSpan="3"/>
     </Grid>
 </Window>

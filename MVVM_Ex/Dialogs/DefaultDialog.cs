@@ -28,11 +28,8 @@ namespace MVVM_Ex.Dialogs
         {
             var add = new AddWordView();
             (add.DataContext as AddWordViewModel).Words.AddRange(words);
-            if (add.ShowDialog() != false)
-            {
-                return (add.DataContext as AddWordViewModel).Word;
-            }
-            return null;
+            add.ShowDialog();            
+            return (add.DataContext as AddWordViewModel).Word;
         }
 
         public static List<string> LoadForbiddenWords()

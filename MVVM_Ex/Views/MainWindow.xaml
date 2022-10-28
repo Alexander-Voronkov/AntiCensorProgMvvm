@@ -7,7 +7,7 @@
         xmlns:models="clr-namespace:MVVM_Ex.Models"
         xmlns:viewmodels="clr-namespace:MVVM_Ex.ViewModels"
         mc:Ignorable="d"
-        Title="Anti-censor" WindowStartupLocation="CenterScreen" Height="500" Width="500" MinHeight="500" MinWidth="500">
+        Title="Anti-censor" WindowStartupLocation="CenterScreen" Height="600" Width="600" MinHeight="500" MinWidth="500">
     <Window.DataContext>
         <viewmodels:AntiCensorViewModel/>
     </Window.DataContext>
@@ -33,7 +33,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Label Content="Choose directory:" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="15" />
-        <ListBox IsEnabled="{Binding Path=IsNotStarted}" ItemsSource="{Binding Path=SelectedDrives}" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="4" Margin="7">
+        <ListBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="4" Margin="7"  IsEnabled="{Binding Path=IsNotStarted}" ItemsSource="{Binding Path=SelectedDrives}" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <ListBoxItem>
@@ -51,8 +51,12 @@
         <Label Content="Forbidden words" HorizontalAlignment="Center" FontSize="15" VerticalAlignment="Bottom" Grid.Column="0" Grid.ColumnSpan="4" Grid.Row="2" Margin="7"/>
         <Button Command="{Binding Path=StopCommand}" Grid.Row="9" Grid.Column="4" Grid.ColumnSpan="2" Content="Stop" Margin="7"/>
         <Button Command="{Binding Path=StartCommand}" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="2" Content="Start" Margin="7"/>
-        <Button Command="{Binding Path=PauseCommand}" Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Content="Pause" Margin="7"/>
-        <ProgressBar IsIndeterminate="{Binding Path=Marquee}" Value="{Binding Path=Progress}" Maximum="100" Minimum="0" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="6" Margin="7"/>
+        <Button Command="{Binding Path=PauseCommand}" Grid.Row="9" Grid.Column="0" Content="Pause" Margin="7"/>
+        <Label Content="{Binding Path=WorkTime, Mode=OneWay}" Grid.Row="6" Grid.Column="5" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+        <Label Content="Time:" Grid.Row="6" Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+        <Button Command="{Binding Path=ResumeCommand}" Grid.Row="9" Grid.Column="1" Content="Resume" Margin="7"/>
+        <ProgressBar IsIndeterminate="{Binding Path=Marquee}" Value="{Binding Path=Progress, Mode=OneWay}" Maximum="100" Minimum="0" Grid.Column="0" Grid.Row="8" Grid.ColumnSpan="6" Margin="7" Height="25"/>
+        <Label Content="{Binding Path=Progress, Mode=OneWay}" FontSize="20" Grid.Column="2" Grid.ColumnSpan="2" Grid.Row="8" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         <Button Command="{Binding Path=SelectExceptionsCommand}" Content="Exception files" Grid.Row="5" Grid.Column="4" Grid.ColumnSpan="2" Margin="7"/>
     </Grid>
 </Window>
