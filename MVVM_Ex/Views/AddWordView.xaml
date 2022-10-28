@@ -1,0 +1,28 @@
+﻿<Window x:Class="MVVM_Ex.Views.AddWordView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MVVM_Ex.Views"
+        xmlns:vmodels="clr-namespace:MVVM_Ex.ViewModels"
+        mc:Ignorable="d"
+        Title="AddWordView" WindowStartupLocation="CenterScreen" Height="200" Width="300">
+    <Window.DataContext>
+        <vmodels:AddWordViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Label Content="Enter word:" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25"/>
+        <TextBox Text="{Binding Path=Word, Mode=OneWayToSource}" Grid.Row="1" Grid.ColumnSpan="3" Margin="12"/>
+        <Button Command="{Binding Path=DialogAddWordCommand}" Content="Add" Grid.Column="0" Grid.Row="2" Margin="7" Grid.ColumnSpan="3"/>
+    </Grid>
+</Window>
