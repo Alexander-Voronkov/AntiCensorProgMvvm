@@ -21,9 +21,9 @@ namespace MVVM_Ex.Models
         public List<ForbiddenFile> ForbiddenFiles { get; private set; }
         public List<string> Exceptions { get; private set; }
         public Dictionary<string, int> WordsStats { get; private set; }
-        private bool _Cancel;
-        public bool Cancel { get { return _Cancel; } set { _Cancel = value; if(value) Truncate(); } }
-        private bool _Pause;
+        private bool _Cancel=false;
+        public bool Cancel { get { return _Cancel; } set { _Cancel = value; if (value) { Thread.Sleep(1000); Truncate(); } } }
+        private bool _Pause=false;
         public bool Pause { get { return _Pause; } set { _Pause = value; } }
         private bool _CreateLog;
         public bool CreateLog { get { return _CreateLog; } set { _CreateLog = value; } }
@@ -55,13 +55,7 @@ namespace MVVM_Ex.Models
 
         public AntiCensorModel()
         {
-            Truncate();
-            LoadDrives();   
-        }
-
-        private void LoadDrives()
-        {
-            Drives = DriveInfo.GetDrives().Select(x => x.Name).ToList(); 
+            Truncate(); 
         }
 
         private void Truncate()
@@ -69,15 +63,18 @@ namespace MVVM_Ex.Models
             FilePaths = new List<string>();
             ForbiddenWords = new List<string>();
             WordsStats = new Dictionary<string, int>();
+            Exceptions = new List<string>();
             ForbiddenFiles = new List<ForbiddenFile>();
+            Drives = DriveInfo.GetDrives().Select(x => x.Name).ToList();
             if (timer != null)
             {
                 timer.Dispose();
             }
-            Exceptions = new List<string>();
             WorkTime = 0;
             Progress = 0;
+            Pause = false;
             Cancel = false;
+            CountingFiles = false;
             semaphore = new Semaphore(1,2);
             CreateLog = false;
             DestinationDirectory = String.Empty;

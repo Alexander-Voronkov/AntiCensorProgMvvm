@@ -104,6 +104,9 @@ namespace MVVM_Ex.ViewModels
         {
             application.Drives.Clear();
             application.Drives.AddRange(SelectedDrives.Where(x => x.IsSelected).Select(x => x.DrivePath));
+            application.CreateLog = GenerateLog;
+            application.Exceptions.AddRange(ExceptionFiles);
+            application.ForbiddenWords.AddRange(ForbiddenWords);
             Task.Run(application.StartSearching);
             IsStarted = true;
         }
