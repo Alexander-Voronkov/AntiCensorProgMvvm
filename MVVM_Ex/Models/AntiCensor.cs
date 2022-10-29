@@ -22,7 +22,7 @@ namespace MVVM_Ex.Models
         public List<string> Exceptions { get; private set; }
         public Dictionary<string, int> WordsStats { get; private set; }
         private bool _Cancel;
-        public bool Cancel { get { return _Cancel; } set { _Cancel = value; Pause = value; if(value) Truncate(); } }
+        public bool Cancel { get { return _Cancel; } set { _Cancel = value; if(value) Truncate(); } }
         private bool _Pause;
         public bool Pause { get { return _Pause; } set { _Pause = value; } }
         private bool _CreateLog;
@@ -93,7 +93,7 @@ namespace MVVM_Ex.Models
                 {
                     Count(drive);
                 }
-                else
+                else if(Pause&&!Cancel)
                 {
                     while(Pause)
                     {
@@ -101,6 +101,10 @@ namespace MVVM_Ex.Models
                     }
                     if (Cancel)
                         return;
+                }
+                else if(Cancel&&Pause)
+                {
+                    return;
                 }
             }
         }
@@ -115,7 +119,7 @@ namespace MVVM_Ex.Models
                     {
                         FilePaths.Add(item);
                     }
-                    else
+                    else if (Pause && !Cancel)
                     {
                         while (Pause)
                         {
@@ -123,6 +127,10 @@ namespace MVVM_Ex.Models
                         }
                         if (Cancel)
                             return;
+                    }
+                    else if (Cancel && Pause)
+                    {
+                        return;
                     }
                 }                
                 foreach (var directory in Directory.GetDirectories(path.ToString()))
@@ -131,7 +139,7 @@ namespace MVVM_Ex.Models
                     {
                         Count(directory);
                     }
-                    else
+                    else if (Pause && !Cancel)
                     {
                         while (Pause)
                         {
@@ -139,6 +147,10 @@ namespace MVVM_Ex.Models
                         }
                         if (Cancel)
                             return;
+                    }
+                    else if (Cancel && Pause)
+                    {
+                        return;
                     }
                 }
             }
@@ -161,76 +173,98 @@ namespace MVVM_Ex.Models
             if (ForbiddenWords.Count == 0||string.IsNullOrWhiteSpace(DestinationDirectory))
                 return;
             await Task.Run(CountAllFiles);
+            ThreadPool.SetMaxThreads(10,10);
             CountingFiles = false;
             foreach (var file in FilePaths)
             {
                 if(!Pause && !Cancel)
                     ThreadPool.QueueUserWorkItem(FindWordsInFile, file);
-                else
+                else if (Pause && !Cancel)
                 {
-                    while(Pause)
+                    while (Pause)
                     {
 
                     }
                     if (Cancel)
                         return;
+                }
+                else if (Cancel && Pause)
+                {
+                    return;
                 }
             }
         }
 
         private void FindWordsInFile(object path)
         {
-            if (!File.Exists(path.ToString()))
-                return;
-            string result = "";
-            using (Stream s=new FileStream(path.ToString(),FileMode.Open,FileAccess.Read))
+            try
             {
-                using (StreamReader sr=new StreamReader(s))
+                if (!File.Exists(path.ToString()))
+                    return;
+                string result = "";
+                using (Stream s = new FileStream(path.ToString(), FileMode.Open, FileAccess.Read))
                 {
-                    while (!sr.EndOfStream)
+                    using (StreamReader sr = new StreamReader(s))
                     {
-                        if(!Pause && !Cancel)
-                        result += sr.ReadLine();
-                        else
+                        while (!sr.EndOfStream)
                         {
-                            while(Pause)
+                            if (!Pause && !Cancel)
+                                result += sr.ReadLine();
+                            else if (Pause && !Cancel)
                             {
+                                while (Pause)
+                                {
 
+                                }
+                                if (Cancel)
+                                    return;
                             }
-                            if (Cancel)
+                            else if (Cancel && Pause)
+                            {
                                 return;
+                            }
                         }
                     }
                 }
-            }
-            var words = result.Split('\n', ' ', '.', ',', '-', ':', ';', '?', '!', '\\', '/');
-            foreach (var word in words)
-            {
-                if (!Pause && !Cancel)
+                var words = result.Split('\n', ' ', '.', ',', '-', ':', ';', '?', '!', '\\', '/');
+                foreach (var word in words)
                 {
-                    if (ForbiddenWords.Contains(word))
+                    if (!Pause && !Cancel)
                     {
-                        if(WordsStats.ContainsKey(word))
-                            WordsStats[word]++;
-                        else
-                            WordsStats[word] = 1;
-                        ThreadPool.QueueUserWorkItem(CopyFileWithForbiddenWord, path);
-                        return;
+                        if (ForbiddenWords.Contains(word))
+                        {
+                            if (WordsStats.ContainsKey(word))
+                                WordsStats[word]++;
+                            else
+                                WordsStats[word] = 1;
+                            ThreadPool.QueueUserWorkItem(CopyFileWithForbiddenWord, path);
+                            return;
+                        }
                     }
-                }
-                else
-                {
-                    while(Pause)
+                    else if (Pause && !Cancel)
                     {
+                        while (Pause)
+                        {
 
+                        }
+                        if (Cancel)
+                            return;
                     }
-                    if (Cancel)
+                    else if (Cancel && Pause)
+                    {
                         return;
+                    }
                 }
+                semaphore.WaitOne();
+                ObservedFiles++;
+                semaphore.Release();
             }
-            semaphore.WaitOne();
-            ObservedFiles++;
-            semaphore.Release();
+            catch
+            {
+                semaphore.WaitOne();
+                ObservedFiles++;
+                semaphore.Release();
+            }
         }
 
         private void CopyFileWithForbiddenWord(object path)
@@ -248,14 +282,18 @@ namespace MVVM_Ex.Models
                         {
                             content += sr.ReadLine();
                         }
-                        else
+                        else if (Pause && !Cancel)
                         {
-                            while(Pause)
+                            while (Pause)
                             {
 
                             }
                             if (Cancel)
                                 return;
+                        }
+                        else if (Cancel && Pause)
+                        {
+                            return;
                         }
                     }
                 }
@@ -266,7 +304,7 @@ namespace MVVM_Ex.Models
                 {
                     content = content.Replace(fword, "*******");
                 }
-                else
+                else if (Pause && !Cancel)
                 {
                     while (Pause)
                     {
@@ -274,6 +312,10 @@ namespace MVVM_Ex.Models
                     }
                     if (Cancel)
                         return;
+                }
+                else if (Cancel && Pause)
+                {
+                    return;
                 }
             }
             using (var stream=new FileStream(DestinationDirectory+"\\"+Path.GetFileNameWithoutExtension(path.ToString())+" - observed" + Path.GetExtension(path.ToString()),FileMode.Create))
@@ -304,7 +346,7 @@ namespace MVVM_Ex.Models
                     {
                         sw.WriteLine($"\t\t\t{item.Key} --- {item.Value}");
                     }
-                    sw.WriteLine($"Searching lasted {((double)(WorkTime/60)).ToString()} minutes");
+                    sw.WriteLine($"Searching lasted {(WorkTime*1.0/60)} minutes");
                 }
             }
         }
