@@ -15,7 +15,6 @@ namespace MVVM_Ex.Models
     internal class AntiCensorModel
     {
         private System.Timers.Timer timer=null;
-        private Semaphore semaphore;
         public List<string> Drives { get; private set; }
         public List<string> ForbiddenWords { get; private set; }
         public List<ForbiddenFile> ForbiddenFiles { get; private set; }
@@ -75,7 +74,6 @@ namespace MVVM_Ex.Models
             Pause = false;
             Cancel = false;
             CountingFiles = false;
-            semaphore = new Semaphore(1,2);
             CreateLog = false;
             DestinationDirectory = String.Empty;
         }
@@ -110,7 +108,7 @@ namespace MVVM_Ex.Models
         {
             try
             {
-                foreach (var item in Directory.GetFiles(path.ToString()).Where(x => Path.GetExtension(x) == ".txt"))
+                foreach (var item in Directory.GetFiles(path.ToString(),"*.txt"))
                 {
                     if (!Pause && !Cancel)
                     {
@@ -130,7 +128,7 @@ namespace MVVM_Ex.Models
                         return;
                     }
                 }                
-                foreach (var directory in Directory.GetDirectories(path.ToString()))
+                foreach (var directory in Directory.GetDirectories(path.ToString(),"*.txt"))
                 {
                     if (!Pause && !Cancel)
                     {
@@ -170,7 +168,6 @@ namespace MVVM_Ex.Models
             if (ForbiddenWords.Count == 0||string.IsNullOrWhiteSpace(DestinationDirectory))
                 return;
             await Task.Run(CountAllFiles);
-            ThreadPool.SetMaxThreads(10,10);
             CountingFiles = false;
             foreach (var file in FilePaths)
             {
@@ -252,15 +249,13 @@ namespace MVVM_Ex.Models
                         return;
                     }
                 }
-                semaphore.WaitOne();
-                ObservedFiles++;
-                semaphore.Release();
+                Interlocked.Add(ref _ObservedFiles, 1);
+                ObservedFiles = _ObservedFiles;
             }
             catch
             {
-                semaphore.WaitOne();
-                ObservedFiles++;
-                semaphore.Release();
+                Interlocked.Add(ref _ObservedFiles, 1);
+                ObservedFiles = _ObservedFiles;
             }
         }
 
@@ -322,9 +317,8 @@ namespace MVVM_Ex.Models
                     sw.Write(content);
                 }
             }
-            semaphore.WaitOne();
-            ObservedFiles++;
-            semaphore.Release();
+            Interlocked.Add(ref _ObservedFiles, 1);
+            ObservedFiles = _ObservedFiles;
         }
 
         private void GenerateLog()
